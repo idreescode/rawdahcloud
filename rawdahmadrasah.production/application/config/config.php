@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-$config['base_url'] = 'https://rawdahmadrasah.co.uk/';
+$config['base_url'] = 'https://www.rawdahmadrasah.uk/';
 
 /*
 |--------------------------------------------------------------------------

@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install SSH Client
-        run: sudo apt-get install -y openssh-client
+        run: sudo apt-get install -y openssh-client lftp
 
       - name: Deploy to IONOS via SFTP
         env:
@@ -23,8 +23,16 @@ jobs:
           SFTP_PASS: ${{ secrets.IONOS_FTP_PASSWORD }}
           REMOTE_PATH: "/var/www/html/rawdah.cloud/"
         run: |
-          sudo apt-get install -y lftp
           lftp -c "open -u $SFTP_USER,$SFTP_PASS -e 'set sftp:auto-confirm yes; mirror -R --parallel=10 ./ $REMOTE_PATH; bye' sftp://$SFTP_HOST"
+
+      - name: Run Composer Install if Vendor Folder is Missing
+        env:
+          SSH_HOST: ${{ secrets.IONOS_FTP_HOST }}
+          SSH_USER: ${{ secrets.IONOS_SSH_USERNAME }}
+          SSH_PASS: ${{ secrets.IONOS_SSH_PASSWORD }}
+          REMOTE_PATH: "/var/www/html/rawdah.cloud/"
+        run: |
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd $REMOTE_PATH && [ ! -d vendor ] && composer install || echo 'Vendor folder exists, skipping composer install'"
 
       - name: Verify Deployment
         run: echo "SFTP Deployment to IONOS completed successfully!"
